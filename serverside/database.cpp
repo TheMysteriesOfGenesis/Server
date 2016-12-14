@@ -3,6 +3,7 @@
 *------------------------------------------------------------------*/
 
 #include "database.h"
+using namespace std;
 
 /**
 *--------------------------------------------------------------------
@@ -62,6 +63,15 @@ void MySQL::ShowTables()
 	{
 		cout << row[i] << endl;
 	}
+}
+
+string MySQL::getUserPassword(string username) {
+	char query [MAX_USERNAME_LENGTH*2+46] = "SELECT password FROM users WHERE username = '";
+	char *part = &(query[strlen(query)]);
+	mysql_real_escape_string(connect, part, username.c_str() , username.length());
+	query[strlen(query)] = '\'';
+	mysql_query(connect, query);
+	return "****";
 }
 
 /**

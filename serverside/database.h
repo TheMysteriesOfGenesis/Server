@@ -1,3 +1,5 @@
+#pragma once
+
 /**-------------------------------------------------------------------
 *  Include database-detail.h and other files
 *------------------------------------------------------------------*/
@@ -5,6 +7,7 @@
 #include "header.h"
 #include "database-detail.h"
 #include <string>
+#include "Constants.h"
 
 /**
 * ===================================================================
@@ -29,6 +32,8 @@ public:
 
 	/** Function to show tables in database */
 	void ShowTables();
+
+	std::string getUserPassword(std::string username);
 
 	/** MySQL Destructor */
 	~MySQL();

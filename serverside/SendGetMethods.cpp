@@ -43,8 +43,11 @@ bool Server::GetPacketType(int ID, PacketType & _packettype)
 	return true;//Return true if we were successful in retrieving the packet type
 }
 
+//Sends a string to client with id ID
+//Note: will modify string.
 void Server::SendString(int ID, std::string & _string)
 {
+	connections[ID]->encode(_string);
 	PS::ChatMessage message(_string);
 	connections[ID]->pm.Append(message.toPacket());
 }
@@ -63,5 +66,6 @@ bool Server::GetString(int ID, std::string & _string)
 	}
 	_string = buffer; //set string to received buffer message
 	delete[] buffer; //Deallocate buffer memory (cleanup to prevent memory leak)
+	connections[ID]->decode(_string);
 	return true;//Return true if we were successful in retrieving the string
 }

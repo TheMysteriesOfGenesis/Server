@@ -1,36 +1,49 @@
 #pragma once
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #pragma comment(lib,"ws2_32.lib") //Required for WinSock
-#include <WinSock2.h> //For win sockets
 #include <string> //For std::string
 #include <iostream> //For std::cout, std::endl
+#include <WinSock2.h> //For win sockets
+#include "encryption.h"
+#include "database.h"
 #include "FileTransferData.h"
 #include "PacketManager.h"
 #include "PacketStructs.h"
+#include <Windows.h>
 #include <vector> //for std::vector
-
 class Connection
 {
+private:
+	AESEncryption* cipher;
+	std::string username;
 public:
 	Connection(SOCKET socket_)
 	{
 		socket = socket_;
 		ActiveConnection = true; //Default to active connection 
 	}
+	void logIn(std::string username, std::string password);
+	bool loggedIn;
 	bool ActiveConnection; //True if connection is active, false if inactive(due to a disconnect)
 	SOCKET socket;
 	//file transfer data
 	FileTransferData file; //Object that contains information about our file that is being sent to the client from this server
 	PacketManager pm; //Packet Manager for outgoing data for this connection
+	void decode(std::string message);
+	void encode(std::string message);
+	~Connection();
+	
 };
 
 class Server
 {
 public:
-	Server(int PORT, bool BroadcastPublically = false);
+	Server(int PORT, MySQL* sql, bool BroadcastPublically = false);
 	bool ListenForNewConnection();
 
 private:
+
+	MySQL* sql;
 
 	bool sendall(int ID, char * data, int totalbytes);
 	bool recvall(int ID, char * data, int totalbytes);

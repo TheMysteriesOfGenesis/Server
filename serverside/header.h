@@ -3,4 +3,4 @@
 #include <mysql.h>
 #pragma comment(lib, "libmysql.lib")
 
-using namespace std;
+#pragma once

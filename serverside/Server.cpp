@@ -1,6 +1,24 @@
 #include "Server.h"
 
-Server::Server(int PORT, bool BroadcastPublically) //Port = port to broadcast on. BroadcastPublically = false if server is not open to the public (people outside of your router), true = server is open to everyone (assumes that the port is properly forwarded on router settings)
+void Connection::decode(std::string message) {
+	if (cipher)
+		cipher->decode(message);
+}
+void Connection::encode(std::string message) {
+	if (cipher)
+		cipher->decode(message);
+}
+void Connection::logIn(std::string username, std::string password) {
+	username = username;
+	cipher = new AESEncryption(password);
+}
+Connection::~Connection() {
+	if (cipher) {
+		delete cipher;
+	}
+}
+
+Server::Server(int PORT, MySQL* sql, bool BroadcastPublically) //Port = port to broadcast on. BroadcastPublically = false if server is not open to the public (people outside of your router), true = server is open to everyone (assumes that the port is properly forwarded on router settings)
 {
 	//Winsock Startup
 	WSAData wsaData;
@@ -15,11 +33,11 @@ Server::Server(int PORT, bool BroadcastPublically) //Port = port to broadcast on
 		addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	else //If server is only for our router
 		addr.sin_addr.s_addr = inet_addr("127.0.0.1"); //Broadcast locally
-	addr.sin_port = htons(PORT); //Port
+	addr.sin_port = (u_short) htons(PORT); //Port
 	addr.sin_family = AF_INET; //IPv4 Socket
 
 	sListen = socket(AF_INET, SOCK_STREAM, NULL); //Create socket to listen for new connections
-	if (bind(sListen, (SOCKADDR*)&addr, sizeof(addr)) == SOCKET_ERROR) //Bind the address to the socket, if we fail to bind the address..
+	if (SOCKET_ERROR == bind(sListen, (SOCKADDR*)&addr, sizeof(addr))) //Bind the address to the socket, if we fail to bind the address..
 	{
 		std::string ErrorMsg = "Failed to bind the address to our listening socket. Winsock Error:" + std::to_string(WSAGetLastError());
 		MessageBoxA(NULL, ErrorMsg.c_str(), "Error", MB_OK | MB_ICONERROR);
@@ -74,11 +92,17 @@ bool Server::ListenForNewConnection()
 
 bool Server::ProcessPacket(int ID, PacketType _packettype)
 {
+	std::string message;
 	switch (_packettype)
 	{
+	case PacketType::Login:
+	{
+		GetString(ID, message);
+		connections[ID]->logIn(message, sql->getUserPassword(message));
+		break;
+	}
 	case PacketType::ChatMessage: //Packet Type: chat message
 	{
-		std::string message; //string to store our message we received
 		if (!GetString(ID, message)) //Get the chat message and store it in variable: Message
 			return false; //If we do not properly get the chat message, return false
 						  //Next we need to send the message out to each user
@@ -158,7 +182,7 @@ bool Server::HandleSendFile(int ID)
 	{
 		PS::FileDataBuffer fileData; //Create FileDataBuffer packet structure
 		connections[ID]->file.infileStream.read(fileData.databuffer, connections[ID]->file.remainingBytes); //read in remaining bytes
-		fileData.size = connections[ID]->file.remainingBytes; //Set FileDataBuffer remaining bytes
+		fileData.size = (int) connections[ID]->file.remainingBytes; //Set FileDataBuffer remaining bytes
 		connections[ID]->file.fileOffset += connections[ID]->file.remainingBytes; //increment fileoffset by # of bytes written
 		connections[ID]->pm.Append(fileData.toPacket()); //Append fileData packet to packet manager
 	}

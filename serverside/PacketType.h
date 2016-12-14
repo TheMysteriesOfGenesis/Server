@@ -1,6 +1,7 @@
 #pragma once
 enum class PacketType
 {
+	Login, //Username for logging in
 	ChatMessage,
 	FileTransferRequestFile, //Sent to request a file
 	FileTransfer_EndOfFile, //Sent for when file transfer is complete
