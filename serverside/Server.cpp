@@ -12,6 +12,10 @@ void Connection::logIn(std::string username, std::string password) {
 	username = username;
 	cipher = new AESEncryption(password);
 }
+void Connection::logOut() {
+	delete cipher;
+	cipher = 0;
+}
 Connection::~Connection() {
 	if (cipher) {
 		delete cipher;
@@ -239,6 +243,7 @@ void Server::DisconnectClient(int ID) //Disconnects a client and cleans up socke
 	{
 		return; //return - this should never happen, but just in case...
 	}
+	connections[ID]->logOut();
 	connections[ID]->pm.Clear(); //Clear out all remaining packets in queue for this connection
 	connections[ID]->ActiveConnection = false; //Update connection's activity status to false since connection is now unused
 	closesocket(connections[ID]->socket); //Close the socket for this connection

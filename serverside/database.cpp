@@ -70,8 +70,11 @@ string MySQL::getUserPassword(string username) {
 	char *part = &(query[strlen(query)]);
 	mysql_real_escape_string(connect, part, username.c_str() , username.length());
 	query[strlen(query)] = '\'';
+	res_set = mysql_store_result(connect);
 	mysql_query(connect, query);
-	return "****";
+	if (row = mysql_fetch_row(res_set)) {
+		return row[0];
+	}
 }
 
 /**

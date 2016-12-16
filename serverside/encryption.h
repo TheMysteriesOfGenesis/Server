@@ -2,9 +2,8 @@
 
 #include <string>
 #include <cstdio>
-#include "Crypto\aes.h"
-#include "Crypto\MD5.h"
-#include "Crypto\modes.h"
+#include "aes.h"
+#include "modes.h"
 
 class AESEncryption
 {

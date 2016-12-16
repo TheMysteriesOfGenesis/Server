@@ -31,6 +31,7 @@ public:
 	PacketManager pm; //Packet Manager for outgoing data for this connection
 	void decode(std::string message);
 	void encode(std::string message);
+	void logOut();
 	~Connection();
 	
 };
